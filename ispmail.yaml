@@ -1,0 +1,34 @@
+--- # Setting up workaround.org ismail on Debian
+- hosts: seneca
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+  tasks:
+  - name: Updating Seneca
+    apt:
+      upgrade: yes
+      update_cache: yes
+
+  - name: Adding rspamd repo
+    apt_repository:
+      repo: "deb http://rspamd.com/apt-stable/ stretch main"
+      state: present
+
+  - name: rspamd key
+    apt_key:
+      url: https://rspamd.com/apt-stable/gpg.key
+      state: present
+  
+  - name: Install packages
+    apt:
+      name: vim,glances,ranger,htop,ncdu,zsh,screenfetch
+      state: present
+
+  - name: Installing ISPMail packages
+    apt:
+      name: mariadb-server,postfix,postfix-mysql,dovecot-mysql,dovecot-pop3d,dovecot-lmtpd,dovecot-managesieved,apache2,php7.0,phpmyadmin,rspamd,pwgen,roundcube,roundcube-plugins,roundcube-plugins-extra,swaks,mutt,certbot,ca-certificates,php-net-sieve
+      state: present
+
+

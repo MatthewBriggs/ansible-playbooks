@@ -1,0 +1,36 @@
+--- # Update all Debian, Ubuntu and FreeBSD Hosts
+- hosts: ubuntu, debian 
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+  tasks:
+  - name: Updating all Debian and Ubuntu hosts
+    apt:
+      upgrade: yes
+      update_cache: yes
+    register: apt_stdout
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  - debug: var=apt_stdout
+
+  - name: Autoremove unused packages
+    command: apt-get -y autoremove
+    register: autoremove_output
+    changed_when: "'The following packages will be REMOVED' in autoremove_output.stdout"
+
+  - name: Check if a reboot is required
+    shell: "[ -f /var/run/reboot-required ]"
+    failed_when: False
+    register: reboot_required
+    changed_when: reboot_required.rc == 0
+    notify: Telegram notification with possibility of restart
+
+  handlers:
+    - name: Telegram notification with possibility of restart
+      telegram:
+        token: '559894758:AAGi63FhzUPSNf429ApbVqX2uvQ_n4QDCLA'
+        chat_id: -309094464 
+        msg_format: markdown
+        msg: "*{{ ansible_hostname }}* needs a restart"
+      when: reboot_required.changed

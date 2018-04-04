@@ -1,0 +1,22 @@
+--- # Update all Debian, Ubuntu and FreeBSD Hosts
+- hosts: centos
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+  tasks:
+  - name: Updating all CentOS hosts
+    yum:
+      name: '*' 
+      state: latest
+    register: yum_stdout
+  - debug: var=yum_stdout
+
+  - name: Telegram notification with possibility of restart
+    telegram:
+      token: '559894758:AAGi63FhzUPSNf429ApbVqX2uvQ_n4QDCLA'
+      chat_id: -309094464 
+      msg_format: markdown
+      msg: "*{{ ansible_hostname }}* installed updates"
+    when: yum_stdout.changed

@@ -1,0 +1,22 @@
+--- #https://morph027.gitlab.io/post/pve-kickseed/
+- hosts: zeno
+  remote_user: system
+  become: true
+  become_method: sudo
+  gather_facts: no
+
+  vars:
+    - centos_kernel: http://ftp.hosteurope.de/mirror/centos.org/7/os/x86_64/isolinux/vmlinuz
+    - centos_initrd: http://ftp.hosteurope.de/mirror/centos.org/7/os/x86_64/isolinux/initrd.img
+    - installer_args: '-kernel /tmp/vmlinuz -initrd /tmp/initrd.img -append "inst.stage2=http://ftp.hosteurope.de/mirror/centos.org/7/os/x86_64/ inst.repo=http://ftp.hosteurope.de/mirror/centos.org/7/os/x86_64/ inst.ks=https://gitlab.com/morph027/kickstart-gitlab-ci-multi-runner/raw/master/gitlab-runner.cfg rd.noverifyssl"'
+
+  tasks:
+    - name: Downloading kernel
+      shell: wget -O vmlinuz {{ centos_kernel }}
+      args:
+        chdir: /tmp
+
+    - name: Downloading initrd
+      shell: wget -O initrd {{ centos_initrd }}
+      args:
+        chdir: /tmp
